@@ -1,35 +1,37 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { common } from "./translations/common";
+import { select } from "./translations/select";
+import { setup } from "./translations/setup";
+import { game } from "./translations/game";
+import { decision } from "./translations/decision";
+import { result } from "./translations/result";
 
 export type Language = "es" | "en";
 
-const translations = {
+const dictionaries: Record<Language, Record<string, string>> = {
   es: {
-    "select.presents": "TELEDATA PRESENTA",
-    "select.title": "ELEGÍ TU PERSONAJE",
-    "select.subtitle": "// Seleccioná al ejecutivo que vas a guiar en la misión",
-    "select.cta": "[ SELECCIONAR ]",
-    "select.footer": "Las preguntas y la lógica del juego son las mismas para ambos personajes.",
-    "select.avatarAlt": "Avatar de",
-    "lang.switchTo": "Cambiar a inglés",
+    ...common.es,
+    ...select.es,
+    ...setup.es,
+    ...game.es,
+    ...decision.es,
+    ...result.es,
   },
   en: {
-    "select.presents": "TELEDATA PRESENTS",
-    "select.title": "CHOOSE YOUR CHARACTER",
-    "select.subtitle": "// Select the executive you will guide on the mission",
-    "select.cta": "[ SELECT ]",
-    "select.footer": "The questions and the game logic are the same for both characters.",
-    "select.avatarAlt": "Avatar of",
-    "lang.switchTo": "Switch to Spanish",
+    ...common.en,
+    ...select.en,
+    ...setup.en,
+    ...game.en,
+    ...decision.en,
+    ...result.en,
   },
-} as const;
-
-export type TranslationKey = keyof (typeof translations)["es"];
+};
 
 interface LanguageContextValue {
   language: Language;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
-  t: (key: TranslationKey) => string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
@@ -43,7 +45,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
 
   const t = useCallback(
-    (key: TranslationKey) => translations[language][key] ?? key,
+    (key: string, vars?: Record<string, string | number>) => {
+      let value = dictionaries[language][key] ?? dictionaries.es[key] ?? key;
+      if (vars) {
+        for (const [k, v] of Object.entries(vars)) {
+          value = value.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+        }
+      }
+      return value;
+    },
     [language],
   );
 
