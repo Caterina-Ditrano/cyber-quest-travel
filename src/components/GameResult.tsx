@@ -4,6 +4,7 @@ import { ShieldAlert, ShieldCheck, RotateCcw, Award, Trophy, Flame, Heart, Skull
 import type { Character, TravelDetails } from "@/data/characters";
 import jsPDF from "jspdf";
 import pdfBgCyber from "@/assets/pdf-bg-cyber.jpg";
+import { ShareResults } from "./ShareResults";
 
 export interface FeedbackEntry {
   question: string;
@@ -636,6 +637,15 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
             REINICIAR MISIÓN
           </Button>
         </div>
+
+        {/* Share */}
+        <ShareResults
+          playerName={playerName}
+          rankLabel={rank.label}
+          score={score}
+          correctAnswers={correctAnswers}
+          totalQuestions={totalQuestions}
+        />
 
         <p className="text-center text-xs text-muted-foreground font-mono">
           Desarrollado por TELEDATA • Concientización en Ciberseguridad
