@@ -638,6 +638,15 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
           </Button>
         </div>
 
+        {/* Share */}
+        <ShareResults
+          playerName={playerName}
+          rankLabel={rank.label}
+          score={score}
+          correctAnswers={correctAnswers}
+          totalQuestions={totalQuestions}
+        />
+
         <p className="text-center text-xs text-muted-foreground font-mono">
           Desarrollado por TELEDATA • Concientización en Ciberseguridad
         </p>
