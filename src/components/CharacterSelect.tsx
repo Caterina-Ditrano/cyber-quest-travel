@@ -1,23 +1,26 @@
 import { characters, type Character } from "@/data/characters";
 import { Briefcase, Building } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface CharacterSelectProps {
   onSelect: (character: Character) => void;
 }
 
 export function CharacterSelect({ onSelect }: CharacterSelectProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen cyber-grid flex items-center justify-center p-4">
       <div className="max-w-4xl w-full space-y-10 animate-fade-in-up">
         <div className="text-center space-y-3">
           <span className="text-xs font-mono text-muted-foreground tracking-widest">
-            TELEDATA PRESENTA
+            {t("select.presents")}
           </span>
           <h1 className="text-4xl md:text-5xl font-mono font-bold text-primary neon-text animate-pulse-glow">
-            ELEGÍ TU PERSONAJE
+            {t("select.title")}
           </h1>
           <p className="text-sm md:text-base text-muted-foreground font-mono">
-            // Seleccioná al ejecutivo que vas a guiar en la misión
+            {t("select.subtitle")}
           </p>
         </div>
 
@@ -34,7 +37,7 @@ export function CharacterSelect({ onSelect }: CharacterSelectProps) {
                   <div className="relative aspect-square overflow-hidden rounded-lg border border-primary/30">
                     <img
                       src={character.avatar}
-                      alt={`Avatar de ${displayName}`}
+                      alt={`${t("select.avatarAlt")} ${displayName}`}
                       width={512}
                       height={512}
                       loading="lazy"
@@ -61,7 +64,7 @@ export function CharacterSelect({ onSelect }: CharacterSelectProps) {
 
                   <div className="pt-2 border-t border-border">
                     <span className="font-mono text-xs text-primary group-hover:neon-text transition-all">
-                      [ SELECCIONAR ]
+                      {t("select.cta")}
                     </span>
                   </div>
                 </div>
@@ -71,7 +74,7 @@ export function CharacterSelect({ onSelect }: CharacterSelectProps) {
         </div>
 
         <p className="text-center text-xs text-muted-foreground font-mono">
-          Las preguntas y la lógica del juego son las mismas para ambos personajes.
+          {t("select.footer")}
         </p>
       </div>
     </div>
