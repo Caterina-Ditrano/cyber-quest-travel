@@ -9,6 +9,19 @@ export const setup = {
     "name.hintPrefix": "Si lo dejás vacío, te llamaremos",
     "name.defaultName": "Agente",
 
+    // Destinations
+    "city.madrid": "Madrid",
+    "city.paris": "París",
+    "city.berlin": "Berlín",
+    "city.london": "Londres",
+    "city.newyork": "Nueva York",
+    "city.mexicocity": "Ciudad de México",
+    "city.saopaulo": "San Pablo",
+    "city.santiagodechile": "Santiago de Chile",
+
+    // Avatar alt
+    "intro.avatarAlt": "Avatar de {name}",
+
     // TravelDetailsInput
     "details.kicker": "CONFIGURACIÓN DE LA MISIÓN",
     "details.title": "DATOS DEL VIAJE",
@@ -74,6 +87,19 @@ export const setup = {
     "name.placeholder": "Enter your name",
     "name.hintPrefix": "If you leave it empty, we'll call you",
     "name.defaultName": "Agent",
+
+    // Destinations
+    "city.madrid": "Madrid",
+    "city.paris": "Paris",
+    "city.berlin": "Berlin",
+    "city.london": "London",
+    "city.newyork": "New York",
+    "city.mexicocity": "Mexico City",
+    "city.saopaulo": "São Paulo",
+    "city.santiagodechile": "Santiago, Chile",
+
+    // Avatar alt
+    "intro.avatarAlt": "{name}'s avatar",
 
     // TravelDetailsInput
     "details.kicker": "MISSION SETUP",

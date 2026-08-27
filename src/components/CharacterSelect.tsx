@@ -1,4 +1,5 @@
-import { characters, type Character } from "@/data/characters";
+import type { Character } from "@/data/characters";
+import { useGameContent } from "@/data/useGameContent";
 import { Briefcase, Building } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
@@ -8,6 +9,7 @@ interface CharacterSelectProps {
 
 export function CharacterSelect({ onSelect }: CharacterSelectProps) {
   const { t } = useLanguage();
+  const { characters } = useGameContent();
 
   return (
     <div className="min-h-screen cyber-grid flex items-center justify-center p-4">

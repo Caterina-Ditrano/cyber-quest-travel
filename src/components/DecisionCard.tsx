@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MapPin, Lightbulb, ArrowRight, Timer, CheckCircle2, XCircle, Clock, Zap, Flame } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export interface AnswerResult {
   isCorrect: boolean;
@@ -31,6 +32,7 @@ const BASE_POINTS = 100;
 const MAX_SPEED_BONUS = 100;
 
 export function DecisionCard({ decision, characterAvatar, characterName, combo, onAnswer }: DecisionCardProps) {
+  const { t } = useLanguage();
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [timeLeft, setTimeLeft] = useState(STAGE_SECONDS);
@@ -79,10 +81,10 @@ export function DecisionCard({ decision, characterAvatar, characterName, combo, 
   const computeResult = (): AnswerResult => {
     const base = { location: decision.location, tip: decision.tip, question: decision.question };
     if (timedOut) {
-      return { ...base, isCorrect: false, timedOut: true, timeLeft: 0, points: 0, speedBonus: 0, comboMultiplier: 1, feedback: "Tiempo agotado: dudar demasiado también puede ser un riesgo." };
+      return { ...base, isCorrect: false, timedOut: true, timeLeft: 0, points: 0, speedBonus: 0, comboMultiplier: 1, feedback: t("decision.timedOutFeedback") };
     }
     if (selectedOption === null) {
-      return { ...base, isCorrect: false, timedOut: false, timeLeft: lockedTime, points: 0, speedBonus: 0, comboMultiplier: 1, feedback: "Sin respuesta." };
+      return { ...base, isCorrect: false, timedOut: false, timeLeft: lockedTime, points: 0, speedBonus: 0, comboMultiplier: 1, feedback: t("decision.noAnswerFeedback") };
     }
     const opt = decision.options[selectedOption];
     const isCorrect = opt.isCorrect;
@@ -120,7 +122,7 @@ export function DecisionCard({ decision, characterAvatar, characterName, combo, 
         <div className="flex items-center justify-between text-sm font-mono">
           <span className="inline-flex items-center gap-2 text-muted-foreground">
             <Timer className={cn("w-4 h-4", lowTime ? "text-destructive" : "text-primary")} />
-            TIEMPO
+            {t("decision.time")}
           </span>
           <span
             className={cn(
@@ -223,13 +225,13 @@ export function DecisionCard({ decision, characterAvatar, characterName, combo, 
           {(() => {
             const isCorrect = !timedOut && selectedOption !== null && decision.options[selectedOption].isCorrect;
             const accent = timedOut
-              ? { color: "text-secondary", border: "border-secondary/60", bg: "bg-secondary/10", Icon: Clock, label: "TIEMPO AGOTADO" }
+              ? { color: "text-secondary", border: "border-secondary/60", bg: "bg-secondary/10", Icon: Clock, label: t("decision.timedOutLabel") }
               : isCorrect
-              ? { color: "text-primary", border: "border-primary/60", bg: "bg-primary/10", Icon: CheckCircle2, label: "DECISIÓN CORRECTA" }
-              : { color: "text-destructive", border: "border-destructive/60", bg: "bg-destructive/10", Icon: XCircle, label: "DECISIÓN INCORRECTA" };
+              ? { color: "text-primary", border: "border-primary/60", bg: "bg-primary/10", Icon: CheckCircle2, label: t("decision.correctLabel") }
+              : { color: "text-destructive", border: "border-destructive/60", bg: "bg-destructive/10", Icon: XCircle, label: t("decision.incorrectLabel") };
 
             const message = timedOut
-              ? "¡Se acabó el tiempo! Dudar demasiado también puede ser un riesgo. Tengo que ser más rápido la próxima vez."
+              ? t("decision.timedOutMessage")
               : selectedOption !== null
               ? decision.options[selectedOption].consequence
               : "";
@@ -247,7 +249,7 @@ export function DecisionCard({ decision, characterAvatar, characterName, combo, 
                     <div className={cn("relative flex-shrink-0 rounded-full border-2 p-0.5", accent.border)}>
                       <img
                         src={characterAvatar}
-                        alt={`Avatar de ${characterName}`}
+                        alt={t("decision.avatarAlt", { name: characterName })}
                         className="w-14 h-14 rounded-full object-cover"
                       />
                       <span className={cn("absolute -bottom-1 -right-1 w-3 h-3 rounded-full animate-pulse", accent.color.replace("text-", "bg-"))} />
@@ -268,23 +270,23 @@ export function DecisionCard({ decision, characterAvatar, characterName, combo, 
                   {isCorrect ? (
                     <div className="cyber-card p-3 border-primary/40 bg-primary/5">
                       <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-muted-foreground">PUNTOS BASE</span>
+                        <span className="text-muted-foreground">{t("decision.basePoints")}</span>
                         <span className="text-foreground tabular-nums">+{BASE_POINTS}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs font-mono mt-1">
                         <span className="text-muted-foreground inline-flex items-center gap-1">
-                          <Zap className="w-3 h-3 text-secondary" /> BONUS VELOCIDAD
+                          <Zap className="w-3 h-3 text-secondary" /> {t("decision.speedBonus")}
                         </span>
                         <span className="text-secondary tabular-nums">+{result.speedBonus}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs font-mono mt-1">
                         <span className="text-muted-foreground inline-flex items-center gap-1">
-                          <Flame className="w-3 h-3 text-secondary" /> COMBO
+                          <Flame className="w-3 h-3 text-secondary" /> {t("decision.combo")}
                         </span>
                         <span className="text-secondary tabular-nums">x{result.comboMultiplier}</span>
                       </div>
                       <div className="border-t border-primary/20 mt-2 pt-2 flex items-center justify-between font-mono">
-                        <span className="text-xs text-muted-foreground">TOTAL</span>
+                        <span className="text-xs text-muted-foreground">{t("decision.total")}</span>
                         <span className="text-lg text-primary neon-text font-bold tabular-nums">+{result.points}</span>
                       </div>
                     </div>
@@ -292,9 +294,9 @@ export function DecisionCard({ decision, characterAvatar, characterName, combo, 
                     <div className="cyber-card p-3 border-destructive/40 bg-destructive/5">
                       <div className="flex items-center justify-between font-mono text-xs">
                         <span className="text-muted-foreground">
-                          {timedOut ? "TIEMPO AGOTADO" : "RESPUESTA INCORRECTA"}
+                          {timedOut ? t("decision.timedOutLabel") : t("decision.incorrectAnswer")}
                         </span>
-                        <span className="text-destructive">−1 ESCUDO · COMBO RESET</span>
+                        <span className="text-destructive">{t("decision.shieldLost")}</span>
                       </div>
                     </div>
                   )}
@@ -304,7 +306,7 @@ export function DecisionCard({ decision, characterAvatar, characterName, combo, 
                     <div className="flex items-start gap-2">
                       <Lightbulb className="w-4 h-4 text-secondary flex-shrink-0 mt-0.5" />
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        <span className="font-semibold text-secondary">TIP: </span>
+                        <span className="font-semibold text-secondary">{t("decision.tipLabel")}</span>
                         {decision.tip}
                       </p>
                     </div>
@@ -319,7 +321,7 @@ export function DecisionCard({ decision, characterAvatar, characterName, combo, 
                       size="lg"
                       className="cyber-button font-mono bg-primary text-primary-foreground hover:bg-primary/90 group"
                     >
-                      CONTINUAR
+                      {t("decision.continue")}
                       <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                     </Button>
                   </div>

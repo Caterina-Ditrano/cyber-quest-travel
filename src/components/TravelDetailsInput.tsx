@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, ArrowRight, Building, MapPin, Briefcase } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export interface TravelDetails {
   company: string;
@@ -21,27 +22,28 @@ interface TravelDetailsInputProps {
   onBack: () => void;
 }
 
-export const DESTINATIONS = [
-  "Madrid",
-  "París",
-  "Berlín",
-  "Londres",
-  "Nueva York",
-  "Ciudad de México",
-  "San Pablo",
-  "Santiago de Chile",
-];
+export const DESTINATION_KEYS = [
+  "city.madrid",
+  "city.paris",
+  "city.berlin",
+  "city.london",
+  "city.newyork",
+  "city.mexicocity",
+  "city.saopaulo",
+  "city.santiagodechile",
+] as const;
 
-export const ROLES = [
-  "Ejecutivo/a de ventas",
-  "Gerente comercial",
-  "Account Manager",
-  "Consultor/a",
-  "Project Manager",
-  "Director/a de marketing",
-];
+export const ROLE_KEYS = [
+  "role.sales",
+  "role.commercialManager",
+  "role.accountManager",
+  "role.consultant",
+  "role.projectManager",
+  "role.marketingDirector",
+] as const;
 
 export function TravelDetailsInput({ defaultValues, onSubmit, onBack }: TravelDetailsInputProps) {
+  const { t } = useLanguage();
   const [company, setCompany] = useState(defaultValues?.company ?? "");
   const [destination, setDestination] = useState(defaultValues?.destination ?? "");
   const [role, setRole] = useState(defaultValues?.role ?? "");
@@ -63,13 +65,13 @@ export function TravelDetailsInput({ defaultValues, onSubmit, onBack }: TravelDe
       <div className="max-w-md w-full space-y-8">
         <div className="text-center space-y-3 animate-fade-in-up">
           <span className="text-xs font-mono text-muted-foreground tracking-widest">
-            CONFIGURACIÓN DE LA MISIÓN
+            {t("details.kicker")}
           </span>
           <h1 className="text-3xl md:text-4xl font-mono font-bold text-primary neon-text animate-pulse-glow">
-            DATOS DEL VIAJE
+            {t("details.title")}
           </h1>
           <p className="text-sm text-muted-foreground font-mono">
-            // Personalizá la misión con tu empresa, destino y puesto
+            {t("details.subtitle")}
           </p>
         </div>
 
@@ -84,7 +86,7 @@ export function TravelDetailsInput({ defaultValues, onSubmit, onBack }: TravelDe
               className="flex items-center gap-2 font-mono text-xs text-primary tracking-widest"
             >
               <Building className="w-4 h-4" />
-              EMPRESA
+              {t("details.company")}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-primary neon-text pointer-events-none">
@@ -95,7 +97,7 @@ export function TravelDetailsInput({ defaultValues, onSubmit, onBack }: TravelDe
                 type="text"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                placeholder="Nombre de la empresa"
+                placeholder={t("details.companyPlaceholder")}
                 maxLength={60}
                 autoFocus
                 className="w-full pl-8 pr-3 py-3 rounded-md bg-background/60 border border-primary/40 text-foreground font-mono placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary focus:shadow-[0_0_18px_hsl(var(--primary)/0.55)] transition-all duration-300 caret-primary"
@@ -107,16 +109,16 @@ export function TravelDetailsInput({ defaultValues, onSubmit, onBack }: TravelDe
           <div className="space-y-2">
             <label className="flex items-center gap-2 font-mono text-xs text-primary tracking-widest">
               <MapPin className="w-4 h-4" />
-              DESTINO DEL VIAJE
+              {t("details.destination")}
             </label>
             <Select value={destination} onValueChange={setDestination}>
               <SelectTrigger className="w-full h-12 bg-background/60 border-primary/40 text-foreground font-mono focus:border-primary focus:ring-primary">
-                <SelectValue placeholder="Elegí un destino" />
+                <SelectValue placeholder={t("details.destinationPlaceholder")} />
               </SelectTrigger>
               <SelectContent className="font-mono bg-popover border-primary/40">
-                {DESTINATIONS.map((d) => (
-                  <SelectItem key={d} value={d}>
-                    {d}
+                {DESTINATION_KEYS.map((key) => (
+                  <SelectItem key={key} value={t(key)}>
+                    {t(key)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -127,16 +129,16 @@ export function TravelDetailsInput({ defaultValues, onSubmit, onBack }: TravelDe
           <div className="space-y-2">
             <label className="flex items-center gap-2 font-mono text-xs text-primary tracking-widest">
               <Briefcase className="w-4 h-4" />
-              PUESTO / ROL
+              {t("details.role")}
             </label>
             <Select value={role} onValueChange={setRole}>
               <SelectTrigger className="w-full h-12 bg-background/60 border-primary/40 text-foreground font-mono focus:border-primary focus:ring-primary">
-                <SelectValue placeholder="Elegí un puesto" />
+                <SelectValue placeholder={t("details.rolePlaceholder")} />
               </SelectTrigger>
               <SelectContent className="font-mono bg-popover border-primary/40">
-                {ROLES.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {r}
+                {ROLE_KEYS.map((key) => (
+                  <SelectItem key={key} value={t(key)}>
+                    {t(key)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -152,7 +154,7 @@ export function TravelDetailsInput({ defaultValues, onSubmit, onBack }: TravelDe
               className="font-mono w-full sm:w-auto"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              VOLVER
+              {t("common.back")}
             </Button>
             <Button
               type="submit"
@@ -160,7 +162,7 @@ export function TravelDetailsInput({ defaultValues, onSubmit, onBack }: TravelDe
               disabled={!canSubmit}
               className="cyber-button font-mono text-base px-8 bg-primary text-primary-foreground hover:bg-primary/90 neon-border w-full sm:w-auto disabled:opacity-50"
             >
-              CONTINUAR
+              {t("common.continue")}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>

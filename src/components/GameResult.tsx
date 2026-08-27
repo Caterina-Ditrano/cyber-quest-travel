@@ -5,6 +5,7 @@ import type { Character, TravelDetails } from "@/data/characters";
 import jsPDF from "jspdf";
 import pdfBgCyber from "@/assets/pdf-bg-cyber.jpg";
 import { ShareResults } from "./ShareResults";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export interface FeedbackEntry {
   question: string;
@@ -30,22 +31,24 @@ interface GameResultProps {
 }
 
 export function GameResult({ correctAnswers, totalQuestions, onRestart, character, playerName, travelDetails, score, bestCombo, livesLeft, timeouts, feedbackLog, gameOver }: GameResultProps) {
+  const { t } = useLanguage();
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
   const name = playerName;
 
   const getRank = () => {
-    if (score >= 1500) return { label: "ÉLITE CYBER", color: "text-primary" };
-    if (score >= 900) return { label: "EXPERTO", color: "text-secondary" };
-    if (score >= 400) return { label: "AGENTE", color: "text-yellow-500" };
-    return { label: "NOVATO", color: "text-destructive" };
+    if (score >= 1500) return { label: t("result.rank.elite"), color: "text-primary" };
+    if (score >= 900) return { label: t("result.rank.expert"), color: "text-secondary" };
+    if (score >= 400) return { label: t("result.rank.agent"), color: "text-yellow-500" };
+    return { label: t("result.rank.novice"), color: "text-destructive" };
   };
 
   const getResult = () => {
+    const vars = { name, role: travelDetails.role, company: travelDetails.company, destination: travelDetails.destination };
     if (gameOver) {
       return {
-        title: "SISTEMA COMPROMETIDO",
+        title: t("result.gameOver.title"),
         icon: Skull,
-        message: `${name} (${travelDetails.role} en ${travelDetails.company}) perdió todos sus escudos durante el viaje a ${travelDetails.destination}. La misión fue interrumpida por exponer información sensible.`,
+        message: t("result.gameOver.message", vars),
         color: "text-destructive",
         bgColor: "bg-destructive/10",
         borderColor: "border-destructive/50",
@@ -53,27 +56,27 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
     }
     if (percentage >= 70) {
       return {
-        title: "MISIÓN COMPLETADA",
+        title: t("result.success.title"),
         icon: ShieldCheck,
-        message: `${name} (${travelDetails.role} en ${travelDetails.company}) completó el viaje a ${travelDetails.destination} manteniendo protegidos sus datos y dispositivos.`,
+        message: t("result.success.message", vars),
         color: "text-primary",
         bgColor: "bg-primary/10",
         borderColor: "border-primary/50",
       };
     } else if (percentage >= 50) {
       return {
-        title: "MISIÓN EN RIESGO",
+        title: t("result.risk.title"),
         icon: ShieldAlert,
-        message: `${name} (${travelDetails.role} en ${travelDetails.company}) logró completar el viaje a ${travelDetails.destination}, pero algunas decisiones aumentaron el nivel de riesgo.`,
+        message: t("result.risk.message", vars),
         color: "text-yellow-500",
         bgColor: "bg-yellow-500/10",
         borderColor: "border-yellow-500/50",
       };
     } else {
       return {
-        title: "SISTEMA COMPROMETIDO",
+        title: t("result.compromised.title"),
         icon: ShieldAlert,
-        message: `${name} (${travelDetails.role} en ${travelDetails.company}) expuso información sensible durante el viaje a ${travelDetails.destination}.`,
+        message: t("result.compromised.message", vars),
         color: "text-destructive",
         bgColor: "bg-destructive/10",
         borderColor: "border-destructive/50",
@@ -86,7 +89,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
   const result = getResult();
   const ResultIcon = result.icon;
   const incorrectAnswers = Math.max(0, feedbackLog.filter((f) => !f.isCorrect && !f.timedOut).length);
-  const riskLevel = gameOver || percentage < 50 ? "ALTO" : percentage < 70 ? "MEDIO" : "BAJO";
+  const riskLevel = gameOver || percentage < 50 ? t("result.pdf.riskHigh") : percentage < 70 ? t("result.pdf.riskMedium") : t("result.pdf.riskLow");
 
   const loadImageAsDataUrl = async (url: string): Promise<{ data: string; format: string } | null> => {
     try {
@@ -269,17 +272,17 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
     setText(dim);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
-    doc.text("// CYBER ESCAPE", textX, y + 22);
+    doc.text(t("result.pdf.header"), textX, y + 22);
 
     setText(neon);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(20);
-    doc.text("REPORTE DE MISIÓN", textX, y + 46);
+    doc.text(t("result.pdf.title"), textX, y + 46);
 
     setText(text);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text(`Agente ${playerName}`, textX, y + 66);
+    doc.text(t("result.pdf.agent", { name: playerName }), textX, y + 66);
 
 
     setText(dim);
@@ -305,7 +308,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
     setText(dim);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
-    doc.text("PUNTAJE FINAL", margin + 20, heroY + 22);
+    doc.text(t("result.pdf.finalScore"), margin + 20, heroY + 22);
 
     setText(neon);
     doc.setFont("helvetica", "bold");
@@ -315,18 +318,18 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
     setText(text);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    doc.text(`Trofeo · Mejor combo x${bestCombo}`, margin + 20, heroY + 84);
+    doc.text(t("result.pdf.trophyCombo", { combo: String(bestCombo) }), margin + 20, heroY + 84);
 
     // Right: rank pill + risk
     const rankColor: [number, number, number] =
-      rank.label === "ÉLITE CYBER" ? neon : rank.label === "EXPERTO" ? neon : rank.label === "AGENTE" ? warn : warn;
-    const riskColor: [number, number, number] = riskLevel === "ALTO" ? danger : riskLevel === "MEDIO" ? warn : neon;
+      rank.label === t("result.rank.elite") ? neon : rank.label === t("result.rank.expert") ? neon : rank.label === t("result.rank.agent") ? warn : warn;
+    const riskColor: [number, number, number] = riskLevel === t("result.pdf.riskHigh") ? danger : riskLevel === t("result.pdf.riskMedium") ? warn : neon;
 
     const rightX = pageW - margin - 20;
     setText(dim);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
-    const rankLabel = "RANGO";
+    const rankLabel = t("result.pdf.rank");
     doc.text(rankLabel, rightX - doc.getTextWidth(rankLabel), heroY + 22);
 
     setText(rankColor);
@@ -338,7 +341,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
     setText(dim);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
-    const riskLabel = "NIVEL DE RIESGO";
+    const riskLabel = t("result.pdf.riskLevel");
     doc.text(riskLabel, rightX - doc.getTextWidth(riskLabel), heroY + 66);
 
     setText(riskColor);
@@ -350,13 +353,13 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
     y = heroY + heroH + 16;
 
     // ============ PERFIL CARD ============
-    card("PERFIL DEL AGENTE", neon, (ix, iw) => {
+    card(t("result.pdf.profileTitle"), neon, (ix, iw) => {
       const colW = iw / 2;
       const rows: Array<[string, string]> = [
-        ["JUGADOR", playerName],
-        ["EMPRESA", travelDetails.company],
-        ["PUESTO", travelDetails.role],
-        ["DESTINO", travelDetails.destination],
+        [t("result.pdf.player"), playerName],
+        [t("result.pdf.company"), travelDetails.company],
+        [t("result.pdf.role"), travelDetails.role],
+        [t("result.pdf.destination"), travelDetails.destination],
       ];
       const startY = y;
       let col = 0;
@@ -383,14 +386,14 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
     });
 
     // ============ ESTADÍSTICAS CARD ============
-    card("ESTADÍSTICAS DE COMBATE", neon, (ix, iw) => {
+    card(t("result.pdf.statsTitle"), neon, (ix, iw) => {
       const stats: Array<{ label: string; value: string; color: [number, number, number] }> = [
-        { label: "CORRECTAS", value: `${correctAnswers}/${totalQuestions}`, color: neon },
-        { label: "INCORRECTAS", value: `${incorrectAnswers}`, color: danger },
-        { label: "TIMEOUTS", value: `${timeouts}`, color: warn },
-        { label: "PRECISIÓN", value: `${percentage}%`, color: percentage >= 70 ? neon : danger },
-        { label: "MEJOR COMBO", value: `x${bestCombo}`, color: neon },
-        { label: "ESCUDOS", value: `${livesLeft}`, color: livesLeft <= 1 ? danger : neon },
+        { label: t("result.pdf.correct"), value: `${correctAnswers}/${totalQuestions}`, color: neon },
+        { label: t("result.pdf.incorrect"), value: `${incorrectAnswers}`, color: danger },
+        { label: t("result.pdf.timeouts"), value: `${timeouts}`, color: warn },
+        { label: t("result.pdf.accuracy"), value: `${percentage}%`, color: percentage >= 70 ? neon : danger },
+        { label: t("result.pdf.bestCombo"), value: `x${bestCombo}`, color: neon },
+        { label: t("result.pdf.shields"), value: `${livesLeft}`, color: livesLeft <= 1 ? danger : neon },
       ];
       const cols = 3;
       const gap = 10;
@@ -419,7 +422,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
     });
 
     // ============ RESULTADO CARD ============
-    card("RESULTADO DE LA MISIÓN", riskColor, (ix, iw) => {
+    card(t("result.pdf.resultTitle"), riskColor, (ix, iw) => {
       setText(riskColor);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
@@ -430,7 +433,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
       y += 4;
       // Badge row
       ensureSpace(22);
-      const badgeText = `RANGO OBTENIDO · ${rank.label}`;
+      const badgeText = t("result.pdf.rankObtained", { rank: rank.label });
       doc.setFont("helvetica", "bold");
       doc.setFontSize(9);
       const bw = doc.getTextWidth(badgeText) + 20;
@@ -444,22 +447,22 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
       y += 22;
     });
 
-    // ============ FEEDBACK CARD (forzar página 2) ============
+    // ============ FEEDBACK CARD (force page 2) ============
     doc.addPage();
     drawBackground();
     y = margin;
-    card("BITÁCORA DE DECISIONES", neon, (ix, iw) => {
+    card(t("result.pdf.logTitle"), neon, (ix, iw) => {
       if (feedbackLog.length === 0) {
-        writeText("Sin registros de feedback.", ix, iw, { color: dim });
+        writeText(t("result.pdf.noFeedback"), ix, iw, { color: dim });
         return;
       }
       feedbackLog.forEach((entry, idx) => {
-        const statusLabel = entry.timedOut ? "TIMEOUT" : entry.isCorrect ? "CORRECTA" : "INCORRECTA";
+        const statusLabel = entry.timedOut ? t("result.pdf.timeout") : entry.isCorrect ? t("result.pdf.correctStatus") : t("result.pdf.incorrectStatus");
         const statusColor: [number, number, number] = entry.timedOut ? warn : entry.isCorrect ? neon : danger;
         ensureSpace(54);
         const blockTop = y;
         // Mini card per entry
-        const tipLines = entry.tip ? (doc.splitTextToSize(`Tip: ${entry.tip}`, iw - 20) as string[]) : [];
+        const tipLines = entry.tip ? (doc.splitTextToSize(t("result.pdf.tip", { tip: entry.tip }), iw - 20) as string[]) : [];
         const blockH = 36 + tipLines.length * 11;
         setFill(cardBg);
         doc.roundedRect(ix, blockTop, iw, blockH, 4, 4, "F");
@@ -474,7 +477,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
         setText(text);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(11);
-        doc.text(`DECISIÓN ${idx + 1}`, ix + 12, blockTop + 16);
+        doc.text(t("result.pdf.decisionN", { n: String(idx + 1) }), ix + 12, blockTop + 16);
 
         // Status pill
         doc.setFont("helvetica", "bold");
@@ -490,7 +493,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
         setText(dim);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
-        doc.text(`PUNTOS: `, ix + 12, blockTop + 30);
+        doc.text(t("result.pdf.points"), ix + 12, blockTop + 30);
         setText(entry.points >= 0 ? neon : danger);
         doc.setFontSize(9);
         doc.text(`${entry.points >= 0 ? "+" : ""}${entry.points}`, ix + 50, blockTop + 30);
@@ -515,7 +518,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
       setText(dim);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7);
-      doc.text("TELEDATA · Concientización en Ciberseguridad", margin, pageH - 14);
+      doc.text(t("result.pdf.footer"), margin, pageH - 14);
       const pageStr = `${p} / ${pageCount}`;
       doc.text(pageStr, pageW - margin - doc.getTextWidth(pageStr), pageH - 14);
     }
@@ -529,13 +532,13 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
         {/* Header */}
         <div className="text-center space-y-2">
           <span className="text-xs font-mono text-muted-foreground tracking-widest">
-            MISIÓN COMPLETADA
+            {t("result.header.tag")}
           </span>
           <h1 className="text-3xl md:text-4xl font-mono font-bold text-primary neon-text">
-            RESULTADOS
+            {t("result.header.title")}
           </h1>
           <p className="text-sm font-mono text-muted-foreground">
-            // Agente <span className="text-primary">{playerName}</span>
+            {t("result.header.agent")} <span className="text-primary">{playerName}</span>
           </p>
         </div>
 
@@ -546,7 +549,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
             <div className={cn("relative rounded-full p-1 border-2", result.borderColor)}>
               <img
                 src={character.avatar}
-                alt={`Avatar de ${playerName}`}
+                alt={t("result.avatarAlt", { name: playerName })}
                 width={72}
                 height={72}
                 className="w-16 h-16 rounded-full object-cover"
@@ -554,7 +557,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
               <span className={cn("absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-background animate-pulse", result.bgColor)} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-mono text-muted-foreground tracking-widest">AGENTE</div>
+              <div className="text-xs font-mono text-muted-foreground tracking-widest">{t("result.card.agentLabel")}</div>
               <div className="text-lg font-mono font-bold text-foreground truncate">{playerName}</div>
             </div>
             <ResultIcon className={cn("w-10 h-10 shrink-0", result.color)} />
@@ -571,7 +574,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
 
         {/* Score Hero */}
         <div className={cn("cyber-card p-6 text-center space-y-2 relative overflow-hidden", result.borderColor)}>
-          <div className="text-xs font-mono text-muted-foreground tracking-widest">PUNTAJE FINAL</div>
+          <div className="text-xs font-mono text-muted-foreground tracking-widest">{t("result.score.label")}</div>
           <div className="flex items-center justify-center gap-3">
             <Trophy className="w-8 h-8 text-primary" />
             <div className="text-5xl md:text-6xl font-mono font-bold text-primary neon-text tabular-nums">
@@ -580,7 +583,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
           </div>
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border font-mono text-xs tracking-widest", result.borderColor, rank.color)}>
             <Award className="w-3 h-3" />
-            RANGO: {rank.label}
+            {t("result.score.rank", { rank: rank.label })}
           </div>
         </div>
 
@@ -591,7 +594,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
               <div className="text-2xl font-mono font-bold text-primary neon-text tabular-nums">
                 {correctAnswers}/{totalQuestions}
               </div>
-              <div className="text-[10px] text-muted-foreground font-mono tracking-widest">CORRECTAS</div>
+              <div className="text-[10px] text-muted-foreground font-mono tracking-widest">{t("result.stats.correct")}</div>
             </div>
             <div className="text-center">
               <div className={cn(
@@ -600,19 +603,19 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
               )}>
                 {percentage}%
               </div>
-              <div className="text-[10px] text-muted-foreground font-mono tracking-widest">PRECISIÓN</div>
+              <div className="text-[10px] text-muted-foreground font-mono tracking-widest">{t("result.stats.accuracy")}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-mono font-bold text-secondary neon-text-blue tabular-nums inline-flex items-center gap-1">
                 <Flame className="w-5 h-5" /> x{bestCombo}
               </div>
-              <div className="text-[10px] text-muted-foreground font-mono tracking-widest">MEJOR COMBO</div>
+              <div className="text-[10px] text-muted-foreground font-mono tracking-widest">{t("result.stats.bestCombo")}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-mono font-bold text-destructive tabular-nums inline-flex items-center gap-1">
                 <Heart className="w-5 h-5 fill-destructive" /> {livesLeft}
               </div>
-              <div className="text-[10px] text-muted-foreground font-mono tracking-widest">ESCUDOS</div>
+              <div className="text-[10px] text-muted-foreground font-mono tracking-widest">{t("result.stats.shields")}</div>
             </div>
           </div>
         </div>
@@ -626,7 +629,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
             className="cyber-button font-mono border-primary/60 text-primary hover:bg-primary/10 hover:text-primary neon-text"
           >
             <FileDown className="w-4 h-4 mr-2" />
-            DESCARGAR MI REPORTE
+            {t("result.actions.downloadReport")}
           </Button>
           <Button
             onClick={onRestart}
@@ -634,7 +637,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
             className="cyber-button font-mono bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <RotateCcw className="w-4 h-4 mr-2" />
-            REINICIAR MISIÓN
+            {t("result.actions.restart")}
           </Button>
         </div>
 
@@ -648,7 +651,7 @@ export function GameResult({ correctAnswers, totalQuestions, onRestart, characte
         />
 
         <p className="text-center text-xs text-muted-foreground font-mono">
-          Desarrollado por TELEDATA • Concientización en Ciberseguridad
+          {t("result.footer")}
         </p>
       </div>
     </div>

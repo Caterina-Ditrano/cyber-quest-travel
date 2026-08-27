@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Share2, Twitter, Linkedin, MessageCircle, Link2, Check } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface ShareResultsProps {
   playerName: string;
@@ -13,7 +14,7 @@ interface ShareResultsProps {
 
 /**
  * Social share actions for the Cyber Escape results screen.
- * Builds a localized (Spanish) summary and offers X, LinkedIn, WhatsApp,
+ * Builds a localized summary and offers X, LinkedIn, WhatsApp,
  * and copy-link targets using the native share intent / share URLs.
  */
 export function ShareResults({
@@ -23,11 +24,18 @@ export function ShareResults({
   correctAnswers,
   totalQuestions,
 }: ShareResultsProps) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "https://lovable.app";
-  const shareText = `🛡️ Cyber Escape · ${playerName} alcanzó el rango ${rankLabel} con ${score} puntos y ${correctAnswers}/${totalQuestions} decisiones correctas. ¿Podés superarme?`;
+  const shareText = t("share.text", {
+    name: playerName,
+    rank: rankLabel,
+    score: String(score),
+    correct: String(correctAnswers),
+    total: String(totalQuestions),
+  });
   const fullText = `${shareText} ${shareUrl}`;
 
   const platforms: Array<{
@@ -83,10 +91,10 @@ export function ShareResults({
         document.body.removeChild(ta);
       }
       setCopied(true);
-      toast.success("Resultado copiado al portapapeles");
+      toast.success(t("share.copiedToast"));
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("No se pudo copiar el enlace");
+      toast.error(t("share.copyError"));
     }
   };
 
@@ -99,7 +107,7 @@ export function ShareResults({
         className="cyber-button font-mono border-primary/60 text-primary hover:bg-primary/10 hover:text-primary neon-text"
       >
         <Share2 className="w-4 h-4 mr-2" />
-        COMPARTIR RESULTADO
+        {t("share.button")}
       </Button>
 
       {open && (
@@ -112,7 +120,7 @@ export function ShareResults({
                 href={p.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Compartir en ${p.label}`}
+                aria-label={t("share.ariaShareOn", { platform: p.label })}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-primary/40 bg-background/60 font-mono text-xs text-foreground hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-300 neon-border"
               >
                 <Icon className="w-4 h-4" />
@@ -123,11 +131,11 @@ export function ShareResults({
           <button
             type="button"
             onClick={handleCopy}
-            aria-label="Copiar resultado"
+            aria-label={t("share.ariaCopy")}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-primary/40 bg-background/60 font-mono text-xs text-foreground hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-300 neon-border"
           >
             {copied ? <Check className="w-4 h-4 text-primary" /> : <Link2 className="w-4 h-4" />}
-            {copied ? "COPIADO" : "COPIAR"}
+            {copied ? t("share.copied") : t("share.copy")}
           </button>
         </div>
       )}

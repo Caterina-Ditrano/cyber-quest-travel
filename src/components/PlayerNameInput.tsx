@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, User } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface PlayerNameInputProps {
   onSubmit: (name: string) => void;
@@ -8,11 +9,12 @@ interface PlayerNameInputProps {
 }
 
 export function PlayerNameInput({ onSubmit, onBack }: PlayerNameInputProps) {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const finalName = name.trim() || "Agente";
+    const finalName = name.trim() || t("name.defaultName");
     onSubmit(finalName);
   };
 
@@ -21,13 +23,13 @@ export function PlayerNameInput({ onSubmit, onBack }: PlayerNameInputProps) {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center space-y-3 animate-fade-in-up">
           <span className="text-xs font-mono text-muted-foreground tracking-widest">
-            IDENTIFICACIÓN DEL PERSONAJE
+            {t("name.kicker")}
           </span>
           <h1 className="text-3xl md:text-4xl font-mono font-bold text-primary neon-text animate-pulse-glow">
-            ¿CÓMO SE LLAMA?
+            {t("name.title")}
           </h1>
           <p className="text-sm text-muted-foreground font-mono">
-            // Elegí el nombre con el que se conocerá a tu personaje en la misión
+            {t("name.subtitle")}
           </p>
         </div>
 
@@ -41,7 +43,7 @@ export function PlayerNameInput({ onSubmit, onBack }: PlayerNameInputProps) {
               className="flex items-center gap-2 font-mono text-xs text-primary tracking-widest"
             >
               <User className="w-4 h-4" />
-              NOMBRE DEL PERSONAJE
+              {t("name.label")}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-primary neon-text pointer-events-none">
@@ -52,14 +54,14 @@ export function PlayerNameInput({ onSubmit, onBack }: PlayerNameInputProps) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ingresá tu nombre"
+                placeholder={t("name.placeholder")}
                 maxLength={24}
                 autoFocus
                 className="w-full pl-8 pr-3 py-3 rounded-md bg-background/60 border border-primary/40 text-foreground font-mono placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary focus:shadow-[0_0_18px_hsl(var(--primary)/0.55)] transition-all duration-300 caret-primary"
               />
             </div>
             <p className="text-[10px] font-mono text-muted-foreground">
-              Si lo dejás vacío, te llamaremos <span className="text-primary">Agente</span>.
+              {t("name.hintPrefix")} <span className="text-primary">{t("name.defaultName")}</span>.
             </p>
           </div>
 
@@ -72,14 +74,14 @@ export function PlayerNameInput({ onSubmit, onBack }: PlayerNameInputProps) {
               className="font-mono w-full sm:w-auto"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              VOLVER
+              {t("common.back")}
             </Button>
             <Button
               type="submit"
               size="lg"
               className="cyber-button font-mono text-base px-8 bg-primary text-primary-foreground hover:bg-primary/90 neon-border w-full sm:w-auto"
             >
-              CONTINUAR
+              {t("common.continue")}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
