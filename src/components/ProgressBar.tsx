@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface ProgressBarProps {
   current: number;
@@ -7,16 +8,17 @@ interface ProgressBarProps {
 }
 
 export function ProgressBar({ current, total, correctAnswers }: ProgressBarProps) {
+  const { t } = useLanguage();
   const progress = (current / total) * 100;
   
   return (
     <div className="w-full space-y-2">
       <div className="flex justify-between items-center text-sm font-mono">
         <span className="text-muted-foreground">
-          DECISIÓN <span className="text-primary neon-text">{current}</span> / {total}
+          {t("progress.decision")} <span className="text-primary neon-text">{current}</span> / {total}
         </span>
         <span className="text-muted-foreground">
-          SEGURIDAD: <span className={cn(
+          {t("progress.security")} <span className={cn(
             "font-bold",
             correctAnswers >= current * 0.7 ? "text-primary neon-text" : "text-destructive neon-text-red"
           )}>
