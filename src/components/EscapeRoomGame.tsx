@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { decisions } from "@/data/gameData";
-import { characters, personalize, type Character, type TravelDetails } from "@/data/characters";
+import { personalize, type Character, type TravelDetails } from "@/data/characters";
+import { useGameContent } from "@/data/useGameContent";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { CharacterSelect } from "./CharacterSelect";
 import { PlayerNameInput } from "./PlayerNameInput";
 import { TravelDetailsInput } from "./TravelDetailsInput";
@@ -16,14 +17,17 @@ const MAX_LIVES = 3;
 type GameState = "select" | "name" | "details" | "intro" | "playing" | "result";
 
 export function EscapeRoomGame() {
+  const { t } = useLanguage();
+  const { decisions, characters } = useGameContent();
   const [gameState, setGameState] = useState<GameState>("select");
-  const [character, setCharacter] = useState<Character>(characters[0]);
-  const [playerName, setPlayerName] = useState<string>("Agente");
+  const [characterId, setCharacterId] = useState<Character["id"]>(characters[0].id);
+  const [playerName, setPlayerName] = useState<string>(t("name.defaultName"));
   const [travelDetails, setTravelDetails] = useState<TravelDetails>({
     company: "TechCorp Internacional",
     destination: "Madrid",
-    role: "Ejecutivo/a de ventas",
+    role: t("role.sales"),
   });
+  const character = characters.find((c) => c.id === characterId) ?? characters[0];
   const [currentDecision, setCurrentDecision] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [score, setScore] = useState(0);
@@ -35,7 +39,7 @@ export function EscapeRoomGame() {
   const [floatingPoints, setFloatingPoints] = useState<{ id: number; value: number } | null>(null);
 
   const handleSelectCharacter = (c: Character) => {
-    setCharacter(c);
+    setCharacterId(c.id);
     setGameState("name");
   };
 
@@ -198,10 +202,10 @@ export function EscapeRoomGame() {
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl md:text-3xl font-mono font-bold text-primary neon-text animate-flicker">
-            CYBER ESCAPE
+            {t("game.title")}
           </h1>
           <p className="text-sm text-muted-foreground font-mono">
-            // Misión activa de {playerName} · {travelDetails.destination}
+            {t("game.activeMission")} {playerName} · {travelDetails.destination}
           </p>
         </div>
 
@@ -210,7 +214,7 @@ export function EscapeRoomGame() {
           <div className="inline-flex items-center gap-3 px-3 py-1.5 bg-muted rounded-full border border-border">
             <img
               src={character.avatar}
-              alt={`Avatar de ${playerName}`}
+              alt={`${t("game.avatarAlt")} ${playerName}`}
               width={32}
               height={32}
               loading="lazy"
